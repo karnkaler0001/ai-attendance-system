@@ -44,9 +44,11 @@ const startServer = async () => {
     await loadModels();
     console.log("AI Models Loaded Successfully");
 
-    app.listen(5050, "0.0.0.0", () => {
-      console.log("Server running on 5050");
-    });
+    const PORT = process.env.PORT || 5050;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on ${PORT}`);
+});
   } catch (error) {
     console.log("SERVER ERROR:");
     console.log(error);
