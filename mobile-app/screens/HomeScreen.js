@@ -20,14 +20,20 @@ import {
   UserPlus,
   ScanFace,
   LogOut,
+  GraduationCap,
 } from "lucide-react-native";
 
-const API_URL = "https://ai-attendance-system-vdbt.onrender.com";
+const API_URL =
+  "https://ai-attendance-system-vdbt.onrender.com";
 
-export default function HomeScreen({ navigation, route }) {
+export default function HomeScreen({
+  navigation,
+  route,
+}) {
   const user = route.params?.user;
 
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] =
+    useState(null);
 
   useEffect(() => {
     fetchAnalytics();
@@ -35,43 +41,84 @@ export default function HomeScreen({ navigation, route }) {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`${API_URL}/analytics`);
-      const data = await response.json();
+      const response = await fetch(
+        `${API_URL}/analytics`
+      );
+
+      const data =
+        await response.json();
 
       if (data.success) {
         setAnalytics(data.analytics);
       }
     } catch (error) {
-      console.log(error);
+      console.log(
+        "ANALYTICS FETCH ERROR:",
+        error
+      );
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem(
+        "user"
+      );
+
       navigation.replace("Login");
     } catch (error) {
-      console.log(error);
+      console.log(
+        "LOGOUT ERROR:",
+        error
+      );
     }
   };
 
-  const StatCard = ({ title, value, icon, colors }) => (
-    <LinearGradient colors={colors} style={styles.statCard}>
-      <View style={styles.statIcon}>{icon}</View>
+  const StatCard = ({
+    title,
+    value,
+    icon,
+    colors,
+  }) => (
+    <LinearGradient
+      colors={colors}
+      style={styles.statCard}
+    >
+      <View style={styles.statIcon}>
+        {icon}
+      </View>
 
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statTitle}>{title}</Text>
+      <Text style={styles.statValue}>
+        {value}
+      </Text>
+
+      <Text style={styles.statTitle}>
+        {title}
+      </Text>
     </LinearGradient>
   );
 
   return (
     <LinearGradient
-      colors={["#020617", "#0f172a", "#1e293b"]}
+      colors={[
+        "#020617",
+        "#0f172a",
+        "#1e293b",
+      ]}
       style={styles.screen}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={
+          styles.container
+        }
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
         <View style={styles.header}>
-          <Text style={styles.appName}>AttendAI</Text>
+          <Text style={styles.appName}>
+            AttendAI
+          </Text>
 
           <Text style={styles.title}>
             Hello, {user?.name || "User"} 👋
@@ -87,60 +134,171 @@ export default function HomeScreen({ navigation, route }) {
         <View style={styles.statsGrid}>
           <StatCard
             title="Total Students"
-            value={analytics?.totalStudents || 0}
-            icon={<Users color="white" size={24} />}
-            colors={["#2563eb", "#1d4ed8"]}
+            value={
+              analytics?.totalStudents ||
+              0
+            }
+            icon={
+              <Users
+                color="white"
+                size={24}
+              />
+            }
+            colors={[
+              "#2563eb",
+              "#1d4ed8",
+            ]}
           />
 
           <StatCard
             title="Total Attendance"
-            value={analytics?.totalAttendance || 0}
-            icon={<ClipboardCheck color="white" size={24} />}
-            colors={["#7c3aed", "#5b21b6"]}
+            value={
+              analytics?.totalAttendance ||
+              0
+            }
+            icon={
+              <ClipboardCheck
+                color="white"
+                size={24}
+              />
+            }
+            colors={[
+              "#7c3aed",
+              "#5b21b6",
+            ]}
           />
 
           <StatCard
             title="Today"
-            value={analytics?.todayAttendance || 0}
-            icon={<CalendarCheck color="white" size={24} />}
-            colors={["#16a34a", "#15803d"]}
+            value={
+              analytics?.todayAttendance ||
+              0
+            }
+            icon={
+              <CalendarCheck
+                color="white"
+                size={24}
+              />
+            }
+            colors={[
+              "#16a34a",
+              "#15803d",
+            ]}
           />
 
           <StatCard
             title="Alerts"
             value="View"
-            icon={<Bell color="white" size={24} />}
-            colors={["#dc2626", "#991b1b"]}
+            icon={
+              <Bell
+                color="white"
+                size={24}
+              />
+            }
+            colors={[
+              "#dc2626",
+              "#991b1b",
+            ]}
           />
         </View>
 
         {user?.role === "admin" && (
           <View style={styles.adminBox}>
-            <Text style={styles.sectionTitle}>Admin Shortcuts</Text>
+            <Text
+              style={styles.sectionTitle}
+            >
+              Admin Shortcuts
+            </Text>
 
-            <View style={styles.shortcutGrid}>
+            <View
+              style={styles.shortcutGrid}
+            >
               <TouchableOpacity
                 style={styles.shortcut}
-                onPress={() => navigation.navigate("RegisterStudent")}
+                onPress={() =>
+                  navigation.navigate(
+                    "RegisterStudent"
+                  )
+                }
               >
-                <UserPlus color="#38bdf8" size={30} />
-                <Text style={styles.shortcutText}>Add Student</Text>
+                <UserPlus
+                  color="#38bdf8"
+                  size={30}
+                />
+
+                <Text
+                  style={
+                    styles.shortcutText
+                  }
+                >
+                  Add Student
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.shortcut}
-                onPress={() => navigation.navigate("FaceRegister")}
+                onPress={() =>
+                  navigation.navigate(
+                    "RegisterTeacher"
+                  )
+                }
               >
-                <ScanFace color="#a78bfa" size={30} />
-                <Text style={styles.shortcutText}>Register Face</Text>
+                <GraduationCap
+                  color="#f59e0b"
+                  size={30}
+                />
+
+                <Text
+                  style={
+                    styles.shortcutText
+                  }
+                >
+                  Add Teacher
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.shortcut}
-                onPress={() => navigation.navigate("ManualAttendance")}
+                onPress={() =>
+                  navigation.navigate(
+                    "FaceRegister"
+                  )
+                }
               >
-                <ClipboardCheck color="#22c55e" size={30} />
-                <Text style={styles.shortcutText}>Manual Attendance</Text>
+                <ScanFace
+                  color="#a78bfa"
+                  size={30}
+                />
+
+                <Text
+                  style={
+                    styles.shortcutText
+                  }
+                >
+                  Register Face
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.shortcut}
+                onPress={() =>
+                  navigation.navigate(
+                    "ManualAttendance"
+                  )
+                }
+              >
+                <ClipboardCheck
+                  color="#22c55e"
+                  size={30}
+                />
+
+                <Text
+                  style={
+                    styles.shortcutText
+                  }
+                >
+                  Manual Attendance
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -148,51 +306,117 @@ export default function HomeScreen({ navigation, route }) {
 
         {user?.role === "teacher" && (
           <View style={styles.adminBox}>
-            <Text style={styles.sectionTitle}>Teacher Tools</Text>
+            <Text
+              style={styles.sectionTitle}
+            >
+              Teacher Tools
+            </Text>
 
-            <View style={styles.shortcutGrid}>
+            <View
+              style={styles.shortcutGrid}
+            >
               <TouchableOpacity
                 style={styles.shortcut}
-                onPress={() => navigation.navigate("ManualAttendance")}
+                onPress={() =>
+                  navigation.navigate(
+                    "ManualAttendance"
+                  )
+                }
               >
-                <ClipboardCheck color="#22c55e" size={30} />
-                <Text style={styles.shortcutText}>Manual Attendance</Text>
+                <ClipboardCheck
+                  color="#22c55e"
+                  size={30}
+                />
+
+                <Text
+                  style={
+                    styles.shortcutText
+                  }
+                >
+                  Manual Attendance
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
         <View style={styles.recentBox}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <Text
+            style={styles.sectionTitle}
+          >
+            Recent Activity
+          </Text>
 
-          {analytics?.recentAttendance?.length > 0 ? (
-            analytics.recentAttendance.slice(0, 3).map((item, index) => (
-              <View key={index} style={styles.activityCard}>
-                <View>
-                  <Text style={styles.activityName}>
-                    {item.studentName || "Unknown Student"}
-                  </Text>
+          {analytics?.recentAttendance
+            ?.length > 0 ? (
+            analytics.recentAttendance
+              .slice(0, 3)
+              .map((item, index) => (
+                <View
+                  key={item._id || index}
+                  style={
+                    styles.activityCard
+                  }
+                >
+                  <View>
+                    <Text
+                      style={
+                        styles.activityName
+                      }
+                    >
+                      {item.studentName ||
+                        "Unknown Student"}
+                    </Text>
 
-                  <Text style={styles.activityMeta}>
-                    ID: {item.studentId || "N/A"}
-                  </Text>
+                    <Text
+                      style={
+                        styles.activityMeta
+                      }
+                    >
+                      ID:{" "}
+                      {item.studentId ||
+                        "N/A"}
+                    </Text>
+                  </View>
+
+                  <View>
+                    <Text
+                      style={
+                        styles.activityDate
+                      }
+                    >
+                      {item.date}
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.activityTime
+                      }
+                    >
+                      {item.time}
+                    </Text>
+                  </View>
                 </View>
-
-                <View>
-                  <Text style={styles.activityDate}>{item.date}</Text>
-                  <Text style={styles.activityTime}>{item.time}</Text>
-                </View>
-              </View>
-            ))
+              ))
           ) : (
-            <Text style={styles.emptyText}>No recent activity yet</Text>
+            <Text style={styles.emptyText}>
+              No recent activity yet
+            </Text>
           )}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <LogOut color="white" size={22} />
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={logout}
+        >
+          <LogOut
+            color="white"
+            size={22}
+          />
 
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>
+            Logout
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
@@ -228,7 +452,8 @@ const styles = StyleSheet.create({
   },
 
   roleBadge: {
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor:
+      "rgba(255,255,255,0.12)",
     alignSelf: "flex-start",
     paddingHorizontal: 14,
     paddingVertical: 7,
@@ -263,7 +488,8 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor:
+      "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -275,18 +501,21 @@ const styles = StyleSheet.create({
   },
 
   statTitle: {
-    color: "rgba(255,255,255,0.85)",
+    color:
+      "rgba(255,255,255,0.85)",
     fontSize: 15,
     fontWeight: "600",
   },
 
   adminBox: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor:
+      "rgba(255,255,255,0.08)",
     borderRadius: 24,
     padding: 18,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor:
+      "rgba(255,255,255,0.1)",
   },
 
   sectionTitle: {
@@ -306,13 +535,15 @@ const styles = StyleSheet.create({
   shortcut: {
     width: "48%",
     minHeight: 135,
-    backgroundColor: "rgba(15,23,42,0.9)",
+    backgroundColor:
+      "rgba(15,23,42,0.9)",
     borderRadius: 20,
     padding: 16,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor:
+      "rgba(255,255,255,0.08)",
   },
 
   shortcutText: {
@@ -325,15 +556,18 @@ const styles = StyleSheet.create({
   },
 
   recentBox: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor:
+      "rgba(255,255,255,0.08)",
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor:
+      "rgba(255,255,255,0.1)",
   },
 
   activityCard: {
-    backgroundColor: "rgba(15,23,42,0.9)",
+    backgroundColor:
+      "rgba(15,23,42,0.9)",
     borderRadius: 18,
     padding: 16,
     marginBottom: 12,
@@ -372,7 +606,8 @@ const styles = StyleSheet.create({
   },
 
   logoutButton: {
-    backgroundColor: "rgba(220,38,38,0.9)",
+    backgroundColor:
+      "rgba(220,38,38,0.9)",
     borderRadius: 18,
     padding: 16,
     marginTop: 24,

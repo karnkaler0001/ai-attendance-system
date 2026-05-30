@@ -30,6 +30,7 @@ import AttendanceHistoryScreen from "./screens/AttendanceHistoryScreen";
 import AnalyticsScreen from "./screens/AnalyticsScreen";
 import NotificationScreen from "./screens/NotificationScreen";
 import ManualAttendanceScreen from "./screens/ManualAttendanceScreen";
+import RegisterTeacherScreen from "./screens/RegisterTeacherScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -338,6 +339,14 @@ export default function App() {
             title: "Register Student",
           }}
         />
+
+        <Stack.Screen
+  name="RegisterTeacher"
+  component={RegisterTeacherScreen}
+  options={{
+    title: "Register Teacher",
+  }}
+/>
 
         <Stack.Screen
           name="FaceRegister"
