@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -19,7 +21,6 @@ import {
   ScanFace,
   LogOut,
 } from "lucide-react-native";
-
 
 const API_URL = "https://ai-attendance-system-vdbt.onrender.com";
 
@@ -46,9 +47,13 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const logout = async () => {
-  await AsyncStorage.removeItem("user");
-  navigation.replace("Login");
-};
+    try {
+      await AsyncStorage.removeItem("user");
+      navigation.replace("Login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const StatCard = ({ title, value, icon, colors }) => (
     <LinearGradient colors={colors} style={styles.statCard}>
@@ -66,12 +71,16 @@ export default function HomeScreen({ navigation, route }) {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.appName}>AI Attendance</Text>
+          <Text style={styles.appName}>AttendAI</Text>
 
-          <Text style={styles.title}>Hello, {user?.name || "User"} 👋</Text>
+          <Text style={styles.title}>
+            Hello, {user?.name || "User"} 👋
+          </Text>
 
           <View style={styles.roleBadge}>
-            <Text style={styles.roleText}>{user?.role || "guest"}</Text>
+            <Text style={styles.roleText}>
+              {user?.role || "guest"}
+            </Text>
           </View>
         </View>
 
@@ -106,47 +115,52 @@ export default function HomeScreen({ navigation, route }) {
         </View>
 
         {user?.role === "admin" && (
-  <View style={styles.adminBox}>
-    <Text style={styles.sectionTitle}>Admin Shortcuts</Text>
+          <View style={styles.adminBox}>
+            <Text style={styles.sectionTitle}>Admin Shortcuts</Text>
 
-    <View style={styles.shortcutGrid}>
-      <TouchableOpacity
-        style={styles.shortcut}
-        onPress={() => navigation.navigate("RegisterStudent")}
-      >
-        <UserPlus color="#38bdf8" size={30} />
-        <Text style={styles.shortcutText}>Add Student</Text>
-      </TouchableOpacity>
+            <View style={styles.shortcutGrid}>
+              <TouchableOpacity
+                style={styles.shortcut}
+                onPress={() => navigation.navigate("RegisterStudent")}
+              >
+                <UserPlus color="#38bdf8" size={30} />
+                <Text style={styles.shortcutText}>Add Student</Text>
+              </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.shortcut}
-        onPress={() => navigation.navigate("FaceRegister")}
-      >
-        <ScanFace color="#a78bfa" size={30} />
-        <Text style={styles.shortcutText}>Register Face</Text>
-      </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.shortcut}
+                onPress={() => navigation.navigate("FaceRegister")}
+              >
+                <ScanFace color="#a78bfa" size={30} />
+                <Text style={styles.shortcutText}>Register Face</Text>
+              </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.shortcut}
-        onPress={() => navigation.navigate("ManualAttendance")}
-      >
-        <ClipboardCheck color="#22c55e" size={30} />
-        <Text style={styles.shortcutText}>Manual Attendance</Text>
-      </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.shortcut}
+                onPress={() => navigation.navigate("ManualAttendance")}
+              >
+                <ClipboardCheck color="#22c55e" size={30} />
+                <Text style={styles.shortcutText}>Manual Attendance</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
-      <TouchableOpacity
-  style={styles.logoutButton}
-  onPress={logout}
->
-  <LogOut color="white" size={22} />
+        {user?.role === "teacher" && (
+          <View style={styles.adminBox}>
+            <Text style={styles.sectionTitle}>Teacher Tools</Text>
 
-  <Text style={styles.logoutText}>
-    Logout
-  </Text>
-</TouchableOpacity>
-    </View>
-  </View>
-)}
+            <View style={styles.shortcutGrid}>
+              <TouchableOpacity
+                style={styles.shortcut}
+                onPress={() => navigation.navigate("ManualAttendance")}
+              >
+                <ClipboardCheck color="#22c55e" size={30} />
+                <Text style={styles.shortcutText}>Manual Attendance</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View style={styles.recentBox}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
@@ -174,6 +188,12 @@ export default function HomeScreen({ navigation, route }) {
             <Text style={styles.emptyText}>No recent activity yet</Text>
           )}
         </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <LogOut color="white" size={22} />
+
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
   );
@@ -277,32 +297,32 @@ const styles = StyleSheet.create({
   },
 
   shortcutGrid: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
-  rowGap: 14,
-},
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 14,
+  },
 
-shortcut: {
-  width: "48%",
-  minHeight: 135,
-  backgroundColor: "rgba(15,23,42,0.9)",
-  borderRadius: 20,
-  padding: 16,
-  alignItems: "center",
-  justifyContent: "center",
-  borderWidth: 1,
-  borderColor: "rgba(255,255,255,0.08)",
-},
+  shortcut: {
+    width: "48%",
+    minHeight: 135,
+    backgroundColor: "rgba(15,23,42,0.9)",
+    borderRadius: 20,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
 
   shortcutText: {
-  color: "white",
-  fontSize: 14,
-  fontWeight: "bold",
-  marginTop: 10,
-  textAlign: "center",
-  lineHeight: 19,
-},
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginTop: 10,
+    textAlign: "center",
+    lineHeight: 19,
+  },
 
   recentBox: {
     backgroundColor: "rgba(255,255,255,0.08)",
@@ -349,5 +369,22 @@ shortcut: {
     color: "#94a3b8",
     textAlign: "center",
     marginTop: 10,
+  },
+
+  logoutButton: {
+    backgroundColor: "rgba(220,38,38,0.9)",
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 24,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  logoutText: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "bold",
   },
 });

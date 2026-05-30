@@ -23,7 +23,8 @@ import {
 
 import axios from "axios";
 
-const API_URL = "https://ai-attendance-system-vdbt.onrender.com";
+const API_URL =
+  "https://ai-attendance-system-vdbt.onrender.com";
 
 export default function RegisterStudentScreen() {
   const [name, setName] = useState("");
@@ -31,13 +32,81 @@ export default function RegisterStudentScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const validateEmail = (value) => {
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return emailPattern.test(value);
+  };
+
+  const validatePassword = (value) => {
+    const hasMinimumLength =
+      value.length >= 7;
+
+    const hasAlphabet =
+      /[A-Za-z]/.test(value);
+
+    const hasNumber =
+      /\d/.test(value);
+
+    return (
+      hasMinimumLength &&
+      hasAlphabet &&
+      hasNumber
+    );
+  };
 
   const registerStudent = async () => {
     try {
-      if (!name || !rollNo || !email || !password) {
-        Alert.alert("Error", "Please fill all fields");
+      const cleanName = name.trim();
+      const cleanRollNo = rollNo.trim();
+      const cleanEmail =
+        email.trim().toLowerCase();
+
+      if (
+        !cleanName ||
+        !cleanRollNo ||
+        !cleanEmail ||
+        !password
+      ) {
+        Alert.alert(
+          "Missing Details",
+          "Please fill all fields."
+        );
+
+        return;
+      }
+
+      if (!/^\d+$/.test(cleanRollNo)) {
+        Alert.alert(
+          "Invalid Student ID",
+          "Roll number / Student ID must contain numbers only."
+        );
+
+        return;
+      }
+
+      if (!validateEmail(cleanEmail)) {
+        Alert.alert(
+          "Invalid Email",
+          "Please enter a valid email address."
+        );
+
+        return;
+      }
+
+      if (!validatePassword(password)) {
+        Alert.alert(
+          "Weak Password",
+          "Password must contain at least 7 characters, including at least one alphabet and one number."
+        );
+
         return;
       }
 
@@ -47,15 +116,17 @@ export default function RegisterStudentScreen() {
       const response = await axios.post(
         `${API_URL}/students/register`,
         {
-          name,
-          rollNo,
-          email,
+          name: cleanName,
+          rollNo: cleanRollNo,
+          email: cleanEmail,
           password,
         }
       );
 
       if (response.data.success) {
-        setSuccessMessage("Student Account Created ✔");
+        setSuccessMessage(
+          "Student Account Created Successfully ✔"
+        );
 
         setName("");
         setRollNo("");
@@ -64,20 +135,24 @@ export default function RegisterStudentScreen() {
 
         setTimeout(() => {
           setSuccessMessage("");
-        }, 3000);
+        }, 3500);
       } else {
         Alert.alert(
-          "Error",
-          response.data.message || "Registration failed"
+          "Registration Failed",
+          response.data.message ||
+            "Unable to create student account."
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log(
+        "STUDENT REGISTER ERROR:",
+        error
+      );
 
       Alert.alert(
-        "Error",
+        "Registration Failed",
         error.response?.data?.message ||
-          "Student Registration Failed"
+          "Unable to create student account."
       );
     } finally {
       setLoading(false);
@@ -86,25 +161,43 @@ export default function RegisterStudentScreen() {
 
   return (
     <LinearGradient
-      colors={["#020617", "#0f172a", "#1e293b"]}
+      colors={[
+        "#020617",
+        "#0f172a",
+        "#1e293b",
+      ]}
       style={styles.screen}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={
+          styles.container
+        }
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <View style={styles.iconBox}>
-            <UserPlus color="white" size={42} />
+            <UserPlus
+              color="white"
+              size={42}
+            />
           </View>
 
-          <Text style={styles.title}>Register Student</Text>
+          <Text style={styles.title}>
+            Register Student
+          </Text>
 
           <Text style={styles.subtitle}>
-            Create student profile & login account
+            Create a student profile and
+            login account
           </Text>
         </View>
 
         <View style={styles.card}>
           <View style={styles.inputBox}>
-            <User color="#94a3b8" size={22} />
+            <User
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
               placeholder="Student Name"
@@ -118,21 +211,32 @@ export default function RegisterStudentScreen() {
           </View>
 
           <View style={styles.inputBox}>
-            <Hash color="#94a3b8" size={22} />
+            <Hash
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
-              placeholder="Roll Number / Student ID"
+              placeholder="Numerical Roll Number / Student ID"
               placeholderTextColor="#94a3b8"
               style={styles.input}
               value={rollNo}
-              onChangeText={setRollNo}
+              onChangeText={(value) =>
+                setRollNo(
+                  value.replace(/[^0-9]/g, "")
+                )
+              }
+              keyboardType="number-pad"
               editable={!loading}
               selectionColor="#38bdf8"
             />
           </View>
 
           <View style={styles.inputBox}>
-            <Mail color="#94a3b8" size={22} />
+            <Mail
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
               placeholder="Email Address"
@@ -140,14 +244,19 @@ export default function RegisterStudentScreen() {
               style={styles.input}
               value={email}
               onChangeText={setEmail}
+              keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
               editable={!loading}
               selectionColor="#38bdf8"
             />
           </View>
 
           <View style={styles.inputBox}>
-            <Lock color="#94a3b8" size={22} />
+            <Lock
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
               placeholder="Password"
@@ -156,13 +265,23 @@ export default function RegisterStudentScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
               editable={!loading}
               selectionColor="#38bdf8"
             />
           </View>
 
+          <Text style={styles.passwordHint}>
+            Password must contain at least
+            7 characters, including one
+            alphabet and one number.
+          </Text>
+
           {successMessage ? (
-            <Text style={styles.successText}>{successMessage}</Text>
+            <Text style={styles.successText}>
+              {successMessage}
+            </Text>
           ) : null}
 
           <TouchableOpacity
@@ -173,18 +292,42 @@ export default function RegisterStudentScreen() {
             <LinearGradient
               colors={
                 loading
-                  ? ["#475569", "#334155"]
-                  : ["#2563eb", "#1d4ed8"]
+                  ? [
+                      "#475569",
+                      "#334155",
+                    ]
+                  : [
+                      "#2563eb",
+                      "#1d4ed8",
+                    ]
               }
               style={styles.button}
             >
               {loading ? (
-                <View style={styles.loadingRow}>
-                  <ActivityIndicator color="white" size="small" />
-                  <Text style={styles.buttonText}>Creating Account...</Text>
+                <View
+                  style={
+                    styles.loadingRow
+                  }
+                >
+                  <ActivityIndicator
+                    color="white"
+                    size="small"
+                  />
+
+                  <Text
+                    style={
+                      styles.buttonText
+                    }
+                  >
+                    Creating Account...
+                  </Text>
                 </View>
               ) : (
-                <Text style={styles.buttonText}>
+                <Text
+                  style={
+                    styles.buttonText
+                  }
+                >
                   Create Student Account
                 </Text>
               )}
@@ -216,7 +359,8 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 30,
-    backgroundColor: "rgba(37,99,235,0.9)",
+    backgroundColor:
+      "rgba(37,99,235,0.9)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -236,22 +380,26 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor:
+      "rgba(255,255,255,0.08)",
     padding: 22,
     borderRadius: 26,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor:
+      "rgba(255,255,255,0.1)",
   },
 
   inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor:
+      "rgba(255,255,255,0.08)",
     borderRadius: 18,
     paddingHorizontal: 15,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor:
+      "rgba(255,255,255,0.08)",
   },
 
   input: {
@@ -259,8 +407,16 @@ const styles = StyleSheet.create({
     padding: 16,
     color: "white",
     fontSize: 16,
-    backgroundColor: "transparent",
+    backgroundColor:
+      "transparent",
     outlineStyle: "none",
+  },
+
+  passwordHint: {
+    color: "#94a3b8",
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 14,
   },
 
   successText: {
@@ -275,7 +431,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 18,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 6,
   },
 
   loadingRow: {

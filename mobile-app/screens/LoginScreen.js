@@ -1,5 +1,7 @@
 import { useState } from "react";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {
   View,
   Text,
@@ -13,60 +15,86 @@ import {
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { Lock, Mail, ShieldCheck } from "lucide-react-native";
 
-const API_URL = "https://ai-attendance-system-vdbt.onrender.com";
+import {
+  Lock,
+  Mail,
+  ShieldCheck,
+} from "lucide-react-native";
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const API_URL =
+  "https://ai-attendance-system-vdbt.onrender.com";
 
-  const [loading, setLoading] = useState(false);
+export default function LoginScreen({
+  navigation,
+}) {
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   const login = async () => {
     try {
       if (!email || !password) {
-        Alert.alert("Error", "Enter email and password");
+        Alert.alert(
+          "Error",
+          "Enter email and password"
+        );
+
         return;
       }
 
       setLoading(true);
 
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/auth/login`,
+        {
+          method: "POST",
 
-      const data = await response.json();
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
 
       if (!data.success) {
-        Alert.alert("Login Failed", data.message);
+        Alert.alert(
+          "Login Failed",
+          data.message ||
+            "Invalid email or password"
+        );
+
         return;
       }
 
       await AsyncStorage.setItem(
-  "user",
-  JSON.stringify(data.user)
-);
+        "user",
+        JSON.stringify(data.user)
+      );
 
-if (data.user.role === "student") {
-  navigation.replace("FaceLogin", {
-    user: data.user,
-  });
-} else {
-  navigation.replace("Main", {
-    user: data.user,
-  });
-}
+      navigation.replace("Main", {
+        user: data.user,
+      });
     } catch (error) {
-      console.log(error);
-      Alert.alert("Error", "Server Error");
+      console.log("LOGIN ERROR:", error);
+
+      Alert.alert(
+        "Error",
+        "Unable to connect to server"
+      );
     } finally {
       setLoading(false);
     }
@@ -74,28 +102,47 @@ if (data.user.role === "student") {
 
   return (
     <LinearGradient
-      colors={["#020617", "#0f172a", "#1e293b"]}
+      colors={[
+        "#020617",
+        "#0f172a",
+        "#1e293b",
+      ]}
       style={styles.screen}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
         style={styles.container}
       >
         <View style={styles.logoBox}>
-          <ShieldCheck color="white" size={46} />
+          <ShieldCheck
+            color="white"
+            size={46}
+          />
         </View>
 
-        <Text style={styles.title}>AttendAI</Text>
+        <Text style={styles.title}>
+          AttendAI
+        </Text>
 
         <Text style={styles.subtitle}>
-          Secure facial recognition attendance
+          Secure facial recognition
+          attendance
         </Text>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Welcome Back</Text>
+          <Text style={styles.cardTitle}>
+            Welcome Back
+          </Text>
 
           <View style={styles.inputBox}>
-            <Mail color="#94a3b8" size={22} />
+            <Mail
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
               placeholder="Email address"
@@ -111,7 +158,10 @@ if (data.user.role === "student") {
           </View>
 
           <View style={styles.inputBox}>
-            <Lock color="#94a3b8" size={22} />
+            <Lock
+              color="#94a3b8"
+              size={22}
+            />
 
             <TextInput
               placeholder="Password"
@@ -135,28 +185,57 @@ if (data.user.role === "student") {
             <LinearGradient
               colors={
                 loading
-                  ? ["#475569", "#334155"]
-                  : ["#2563eb", "#1d4ed8"]
+                  ? [
+                      "#475569",
+                      "#334155",
+                    ]
+                  : [
+                      "#2563eb",
+                      "#1d4ed8",
+                    ]
               }
               style={styles.button}
             >
               {loading ? (
-                <View style={styles.loadingRow}>
-                  <ActivityIndicator color="white" size="small" />
+                <View
+                  style={
+                    styles.loadingRow
+                  }
+                >
+                  <ActivityIndicator
+                    color="white"
+                    size="small"
+                  />
 
-                  <Text style={styles.buttonText}>
+                  <Text
+                    style={
+                      styles.buttonText
+                    }
+                  >
                     Logging in...
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.buttonText}>Login</Text>
+                <Text
+                  style={
+                    styles.buttonText
+                  }
+                >
+                  Login
+                </Text>
               )}
             </LinearGradient>
           </TouchableOpacity>
 
           {loading && (
-            <Text style={styles.loadingNote}>
-              Please wait, server may take a few seconds to wake up.
+            <Text
+              style={
+                styles.loadingNote
+              }
+            >
+              Please wait, the server may
+              take a few seconds to wake
+              up.
             </Text>
           )}
         </View>
@@ -180,7 +259,8 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
     borderRadius: 28,
-    backgroundColor: "rgba(37,99,235,0.85)",
+    backgroundColor:
+      "rgba(37,99,235,0.85)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
@@ -203,11 +283,13 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor:
+      "rgba(255,255,255,0.08)",
     borderRadius: 26,
     padding: 22,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor:
+      "rgba(255,255,255,0.12)",
   },
 
   cardTitle: {
@@ -220,12 +302,14 @@ const styles = StyleSheet.create({
   inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor:
+      "rgba(255,255,255,0.1)",
     borderRadius: 16,
     paddingHorizontal: 14,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor:
+      "rgba(255,255,255,0.1)",
   },
 
   input: {
@@ -233,7 +317,8 @@ const styles = StyleSheet.create({
     padding: 15,
     color: "white",
     fontSize: 16,
-    backgroundColor: "transparent",
+    backgroundColor:
+      "transparent",
     outlineStyle: "none",
   },
 

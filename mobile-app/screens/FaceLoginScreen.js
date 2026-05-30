@@ -6,7 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { CameraView, useCameraPermissions } from "expo-camera";
 
@@ -15,11 +18,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import {
   ScanFace,
   ShieldCheck,
+  LogOut,
+  CircleCheck,
 } from "lucide-react-native";
 
-const API_URL = "https://ai-attendance-system-vdbt.onrender.com";
+const API_URL =
+  "https://ai-attendance-system-vdbt.onrender.com";
 
-export default function FaceLoginScreen() {
+export default function FaceLoginScreen({
+  navigation,
+}) {
   const [permission, requestPermission] =
     useCameraPermissions();
 
@@ -28,19 +36,38 @@ export default function FaceLoginScreen() {
   const [loading, setLoading] =
     useState(false);
 
-  const [message, setMessage] =
+  const [successMessage, setSuccessMessage] =
     useState("");
 
   useEffect(() => {
     if (!permission) {
       requestPermission();
     }
-  }, []);
+  }, [permission]);
+
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+
+      navigation.replace("Login");
+    } catch (error) {
+      console.log("LOGOUT ERROR:", error);
+    }
+  };
 
   const markAttendance = async () => {
     try {
+      if (!cameraRef.current) {
+        Alert.alert(
+          "Error",
+          "Camera is not ready yet"
+        );
+
+        return;
+      }
+
       setLoading(true);
-      setMessage("");
+      setSuccessMessage("");
 
       const photo =
         await cameraRef.current.takePictureAsync({
@@ -48,11 +75,6 @@ export default function FaceLoginScreen() {
           quality: 0.5,
           skipProcessing: true,
         });
-
-      console.log(
-        "LOGIN IMAGE SIZE:",
-        photo.base64.length
-      );
 
       const response = await fetch(
         `${API_URL}/attendance/login`,
@@ -73,29 +95,35 @@ export default function FaceLoginScreen() {
       const data =
         await response.json();
 
-      console.log(data);
-
       if (data.success) {
-        setMessage(
-          `Welcome ${data.studentName}`
+        const studentName =
+          data.studentName ||
+          data.name ||
+          "Student";
+
+        setSuccessMessage(
+          `Attendance marked successfully for ${studentName}`
         );
 
-        Alert.alert(
-          "Attendance Marked",
-          `Welcome ${data.studentName}`
-        );
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 4000);
       } else {
         Alert.alert(
-          "Failed",
-          data.message
+          "Face Not Recognized",
+          data.message ||
+            "Please try again"
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log(
+        "ATTENDANCE ERROR:",
+        error
+      );
 
       Alert.alert(
         "Error",
-        "Attendance failed"
+        "Unable to mark attendance"
       );
     } finally {
       setLoading(false);
@@ -105,10 +133,16 @@ export default function FaceLoginScreen() {
   if (!permission?.granted) {
     return (
       <LinearGradient
-        colors={["#020617", "#0f172a"]}
+        colors={[
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+        ]}
         style={styles.center}
       >
-        <Text style={styles.permissionText}>
+        <Text
+          style={styles.permissionText}
+        >
           Camera permission required
         </Text>
 
@@ -118,6 +152,15 @@ export default function FaceLoginScreen() {
         >
           <Text style={styles.buttonText}>
             Allow Camera
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.permissionLogout}
+          onPress={logout}
+        >
+          <Text style={styles.logoutText}>
+            Logout
           </Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -132,11 +175,10 @@ export default function FaceLoginScreen() {
         facing="front"
       />
 
-      {/* TOP */}
       <LinearGradient
         colors={[
-          "rgba(2,6,23,0.95)",
-          "rgba(15,23,42,0.5)",
+          "rgba(2,6,23,0.98)",
+          "rgba(15,23,42,0.55)",
           "transparent",
         ]}
         style={styles.topOverlay}
@@ -149,9 +191,9 @@ export default function FaceLoginScreen() {
             />
           </View>
 
-          <View>
+          <View style={styles.headerTextBox}>
             <Text style={styles.title}>
-              AI Attendance
+              AttendAI
             </Text>
 
             <Text style={styles.subtitle}>
@@ -159,14 +201,43 @@ export default function FaceLoginScreen() {
             </Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={logout}
+        >
+          <LogOut
+            color="white"
+            size={20}
+          />
+
+          <Text style={styles.logoutText}>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </LinearGradient>
 
-      {/* FACE GUIDE */}
       <View style={styles.faceGuide}>
         <View style={styles.faceCircle} />
       </View>
 
-      {/* BOTTOM */}
+      {successMessage ? (
+        <View style={styles.successCard}>
+          <CircleCheck
+            color="#22c55e"
+            size={42}
+          />
+
+          <Text style={styles.successTitle}>
+            Attendance Marked
+          </Text>
+
+          <Text style={styles.successText}>
+            {successMessage}
+          </Text>
+        </View>
+      ) : null}
+
       <LinearGradient
         colors={[
           "transparent",
@@ -174,36 +245,50 @@ export default function FaceLoginScreen() {
         ]}
         style={styles.bottomOverlay}
       >
-        {message ? (
-          <Text style={styles.success}>
-            {message}
-          </Text>
-        ) : null}
-
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={markAttendance}
           disabled={loading}
         >
           <LinearGradient
-            colors={[
-              "#16a34a",
-              "#15803d",
-            ]}
+            colors={
+              loading
+                ? [
+                    "#475569",
+                    "#334155",
+                  ]
+                : [
+                    "#16a34a",
+                    "#15803d",
+                  ]
+            }
             style={styles.captureButton}
           >
-            <ScanFace
-              color="white"
-              size={22}
-            />
+            {loading ? (
+              <ActivityIndicator
+                color="white"
+                size="small"
+              />
+            ) : (
+              <ScanFace
+                color="white"
+                size={22}
+              />
+            )}
 
             <Text style={styles.buttonText}>
               {loading
-                ? "Processing..."
+                ? "Processing Face..."
                 : "Mark Attendance"}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {loading ? (
+          <Text style={styles.loadingNote}>
+            Keep your face inside the frame.
+          </Text>
+        ) : null}
       </LinearGradient>
     </View>
   );
@@ -225,7 +310,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 42,
   },
 
   header: {
@@ -244,6 +329,10 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
 
+  headerTextBox: {
+    flex: 1,
+  },
+
   title: {
     color: "white",
     fontSize: 30,
@@ -253,6 +342,24 @@ const styles = StyleSheet.create({
   subtitle: {
     color: "#cbd5e1",
     marginTop: 4,
+  },
+
+  logoutButton: {
+    marginTop: 18,
+    backgroundColor:
+      "rgba(220,38,38,0.9)",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  logoutText: {
+    color: "white",
+    fontWeight: "bold",
   },
 
   faceGuide: {
@@ -267,9 +374,40 @@ const styles = StyleSheet.create({
     height: 320,
     borderWidth: 4,
     borderColor:
-      "rgba(255,255,255,0.7)",
+      "rgba(255,255,255,0.75)",
     borderRadius: 150,
-    backgroundColor: "transparent",
+    backgroundColor:
+      "transparent",
+  },
+
+  successCard: {
+    position: "absolute",
+    top: "40%",
+    alignSelf: "center",
+    width: "86%",
+    backgroundColor:
+      "rgba(15,23,42,0.96)",
+    borderRadius: 24,
+    padding: 22,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor:
+      "rgba(34,197,94,0.65)",
+  },
+
+  successTitle: {
+    color: "#22c55e",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+
+  successText: {
+    color: "white",
+    fontSize: 15,
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 21,
   },
 
   bottomOverlay: {
@@ -296,17 +434,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  success: {
-    color: "#00ff99",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 18,
+  loadingNote: {
+    color: "#cbd5e1",
+    marginTop: 14,
+    fontSize: 14,
+    textAlign: "center",
   },
 
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 24,
   },
 
   permissionText: {
@@ -318,6 +457,15 @@ const styles = StyleSheet.create({
   permissionButton: {
     backgroundColor: "#16a34a",
     padding: 15,
+    borderRadius: 14,
+  },
+
+  permissionLogout: {
+    marginTop: 18,
+    backgroundColor:
+      "rgba(220,38,38,0.9)",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 14,
   },
 });

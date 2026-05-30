@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 
+import {
+  View,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   Home,
@@ -14,14 +20,9 @@ import {
   User,
 } from "lucide-react-native";
 
-import {
-  View,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
-
 import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
+import TeacherDashboardScreen from "./screens/TeacherDashboardScreen";
 import RegisterStudentScreen from "./screens/RegisterStudentScreen";
 import FaceRegisterScreen from "./screens/FaceRegisterScreen";
 import FaceLoginScreen from "./screens/FaceLoginScreen";
@@ -33,7 +34,7 @@ import ManualAttendanceScreen from "./screens/ManualAttendanceScreen";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MainTabs({ route }) {
+function AdminTabs({ route }) {
   const user = route.params?.user;
 
   return (
@@ -42,95 +43,229 @@ function MainTabs({ route }) {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#020617",
-          borderTopColor: "rgba(255,255,255,0.1)",
+          borderTopColor:
+            "rgba(255,255,255,0.1)",
           height: 70,
           paddingBottom: 10,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: "#38bdf8",
-        tabBarInactiveTintColor: "#64748b",
+        tabBarActiveTintColor:
+          "#38bdf8",
+        tabBarInactiveTintColor:
+          "#64748b",
       }}
     >
       <Tab.Screen
-        name="Dashboard"
+        name="AdminDashboard"
         component={HomeScreen}
         initialParams={{ user }}
         options={{
+          tabBarLabel: "Home",
           tabBarIcon: ({ color }) => (
             <Home color={color} size={24} />
           ),
         }}
       />
 
-      {(user?.role === "teacher" ||
-        user?.role === "student") && (
-        <Tab.Screen
-          name="Mark"
-          component={FaceLoginScreen}
-          initialParams={{ user }}
-          options={{
-            tabBarLabel: "Attendance",
-            tabBarIcon: ({ color }) => (
-              <ClipboardCheck
-                color={color}
-                size={24}
-              />
-            ),
-          }}
-        />
-      )}
-
       <Tab.Screen
-        name="History"
+        name="AdminHistory"
         component={AttendanceHistoryScreen}
         initialParams={{ user }}
         options={{
-          tabBarLabel:
-            user?.role === "student"
-              ? "My History"
-              : "History",
+          tabBarLabel: "History",
           tabBarIcon: ({ color }) => (
             <User color={color} size={24} />
           ),
         }}
       />
 
-      {(user?.role === "admin" ||
-        user?.role === "teacher") && (
-        <Tab.Screen
-          name="Analytics"
-          component={AnalyticsScreen}
-          initialParams={{ user }}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <BarChart3 color={color} size={24} />
-            ),
-          }}
-        />
-      )}
+      <Tab.Screen
+        name="AdminAnalytics"
+        component={AnalyticsScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Analytics",
+          tabBarIcon: ({ color }) => (
+            <BarChart3
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
 
-      {(user?.role === "admin" ||
-        user?.role === "teacher") && (
-        <Tab.Screen
-          name="Alerts"
-          component={NotificationScreen}
-          initialParams={{ user }}
-          options={{
-            tabBarLabel: "Absents",
-            tabBarIcon: ({ color }) => (
-              <Bell color={color} size={24} />
-            ),
-          }}
-        />
-      )}
+      <Tab.Screen
+        name="AdminAlerts"
+        component={NotificationScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Absents",
+          tabBarIcon: ({ color }) => (
+            <Bell color={color} size={24} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
 
-export default function App() {
-  const [initialRoute, setInitialRoute] =
-    useState("Login");
+function TeacherTabs({ route }) {
+  const user = route.params?.user;
 
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#020617",
+          borderTopColor:
+            "rgba(255,255,255,0.1)",
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor:
+          "#38bdf8",
+        tabBarInactiveTintColor:
+          "#64748b",
+      }}
+    >
+      <Tab.Screen
+        name="TeacherDashboard"
+        component={TeacherDashboardScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color }) => (
+            <Home color={color} size={24} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="TeacherMark"
+        component={ManualAttendanceScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Mark",
+          tabBarIcon: ({ color }) => (
+            <ClipboardCheck
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="TeacherHistory"
+        component={AttendanceHistoryScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "History",
+          tabBarIcon: ({ color }) => (
+            <User color={color} size={24} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="TeacherAnalytics"
+        component={AnalyticsScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Analytics",
+          tabBarIcon: ({ color }) => (
+            <BarChart3
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="TeacherAlerts"
+        component={NotificationScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Absents",
+          tabBarIcon: ({ color }) => (
+            <Bell color={color} size={24} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+function StudentTabs({ route }) {
+  const user = route.params?.user;
+
+  return (
+    <Tab.Navigator
+      initialRouteName="StudentMark"
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#020617",
+          borderTopColor:
+            "rgba(255,255,255,0.1)",
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor:
+          "#38bdf8",
+        tabBarInactiveTintColor:
+          "#64748b",
+      }}
+    >
+      <Tab.Screen
+        name="StudentMark"
+        component={FaceLoginScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "Scan Face",
+          tabBarIcon: ({ color }) => (
+            <ClipboardCheck
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="StudentHistory"
+        component={AttendanceHistoryScreen}
+        initialParams={{ user }}
+        options={{
+          tabBarLabel: "My History",
+          tabBarIcon: ({ color }) => (
+            <User color={color} size={24} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+function RoleBasedApp({ route }) {
+  const user = route.params?.user;
+
+  if (user?.role === "admin") {
+    return <AdminTabs route={{ params: { user } }} />;
+  }
+
+  if (user?.role === "teacher") {
+    return <TeacherTabs route={{ params: { user } }} />;
+  }
+
+  return <StudentTabs route={{ params: { user } }} />;
+}
+
+export default function App() {
   const [savedUser, setSavedUser] =
     useState(null);
 
@@ -138,26 +273,22 @@ export default function App() {
     useState(true);
 
   useEffect(() => {
-    checkLogin();
+    checkSavedLogin();
   }, []);
 
-  const checkLogin = async () => {
+  const checkSavedLogin = async () => {
     try {
-      const userData =
+      const saved =
         await AsyncStorage.getItem("user");
 
-      if (userData) {
-        const user = JSON.parse(userData);
-        setSavedUser(user);
-
-        if (user.role === "student") {
-          setInitialRoute("FaceLogin");
-        } else {
-          setInitialRoute("Main");
-        }
+      if (saved) {
+        setSavedUser(JSON.parse(saved));
       }
     } catch (error) {
-      console.log(error);
+      console.log(
+        "AUTO LOGIN ERROR:",
+        error
+      );
     } finally {
       setLoading(false);
     }
@@ -167,8 +298,8 @@ export default function App() {
     return (
       <View style={styles.loader}>
         <ActivityIndicator
-          color="#38bdf8"
           size="large"
+          color="#38bdf8"
         />
       </View>
     );
@@ -177,21 +308,27 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={initialRoute}
+        initialRouteName={
+          savedUser ? "Main" : "Login"
+        }
       >
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+          }}
         />
 
         <Stack.Screen
           name="Main"
-          component={MainTabs}
+          component={RoleBasedApp}
           initialParams={{
             user: savedUser,
           }}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+          }}
         />
 
         <Stack.Screen
@@ -211,22 +348,9 @@ export default function App() {
         />
 
         <Stack.Screen
-          name="FaceLogin"
-          component={FaceLoginScreen}
-          initialParams={{
-            user: savedUser,
-          }}
-          options={{
-            title: "Mark Attendance",
-            headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
           name="ManualAttendance"
           component={ManualAttendanceScreen}
           options={{
-            title: "Manual Attendance",
             headerShown: false,
           }}
         />
